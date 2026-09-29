@@ -1,0 +1,2 @@
+io.qameta.allure.android.junit5.listeners.ExternalStoragePermissionsListener
+io.qameta.allure.android.junit5.AllureJunit5

@@ -4,6 +4,7 @@ object Versions {
 
     const val junit4 = "4.13.2"
     const val junit5 = "5.5.2"
+    const val junitPlatform = "1.5.2"
     const val junitExtensions = "2.4.0"
 
     const val assertJ = "3.19.0"

@@ -183,6 +183,58 @@ You can use WindowHierarchyRule to capture a window hierarchy via uiautomator in
 val windowHierarchyRule = WindowHierarchyRule()
 ```
 
+### Android and JVM tests with JUnit 5
+
+The `allure-kotlin-android-junit5` module is the JUnit 5 counterpart of the modules above: it reports
+Jupiter tests to Allure without any JUnit 4 runner or rule wiring.
+
+#### Setting up the dependency
+```gradle
+dependencies {
+    androidTestImplementation "io.qameta.allure:allure-kotlin-model:$LATEST_VERSION"
+    androidTestImplementation "io.qameta.allure:allure-kotlin-commons:$LATEST_VERSION"
+    androidTestImplementation "io.qameta.allure:allure-kotlin-android-junit5:$LATEST_VERSION"
+}
+```
+
+#### Attaching listener
+
+The listener is registered through the Java Service Loader
+(`META-INF/services/org.junit.platform.launcher.TestExecutionListener`), so any JUnit Platform
+based run reports to Allure automatically: Gradle's `useJUnitPlatform()` on the JVM, or on-device
+instrumentation tests through a JUnit 5 instrumentation setup such as
+[de.mannodermaus' android-junit5](https://github.com/mannodermaus/android-junit5), whose runner
+creates the launcher with the default Service Loader discovery. Keep your regular instrumentation
+runner; there is no `AllureAndroidJUnitRunner` to configure and no annotation to add to test classes.
+
+On a device the listener replaces the global Allure lifecycle with an Android one at the start of
+the test plan, writing results to the instrumentation target's files dir, exactly like the JUnit 4
+runners do. If your setup installs its own lifecycle before the plan starts, it is not replaced by
+an Android file-system one - keep `allure.results.useTestStorage=true` in `allure.properties` so
+results are written through androidx.test.services Test Storage instead (see
+[Orchestrator TestStorage](#orchestrator-teststorage) above). On the JVM the global lifecycle is
+left untouched and results go to the configured `allure.results.directory`.
+
+Each test - and each invocation of a parameterized or dynamic test - becomes its own Allure test
+result with a history id derived from the platform's unique id.
+
+#### Extensions
+
+The JUnit 4 rules have Jupiter extension counterparts with the same behaviour, registered with
+`@ExtendWith` or programmatically:
+* `ScreenshotExtension` - like `ScreenshotRule`, with the same `Mode` (`END`, `SUCCESS`, `FAILURE`)
+* `LogcatExtension` - like `LogcatRule`
+* `WindowHierarchyExtension` - like `WindowHierarchyRule`
+
+```kotlin
+@ExtendWith(ScreenshotExtension::class)
+class MyInstrumentationTest {
+    ...
+}
+```
+
+The `allureScreenshot` function is unchanged and available in the same package as before.
+
 ## Samples
 
 Different examples of `allure-kotlin` usage are presented in `samples` directory. This includes:
